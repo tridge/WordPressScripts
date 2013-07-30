@@ -73,7 +73,10 @@ for title in posts.keys():
     new_post['post_author'] = 'autotest'
     if new_post['post_content'].find('[common_page]') == -1:
         print("Adding common_page")
-        new_post['post_content'] = '[common_page]\n\n' + new_post['post_content']
+        if opts.url_src.find('planner') != -1:
+            new_post['post_content'] = '[common_page_mp]\n\n' + new_post['post_content']
+        else:
+            new_post['post_content'] = '[common_page]\n\n' + new_post['post_content']
 
     if title in dst_posts:
         dst_post = dst_server.wp.getPost(opts.blog_id, opts.username, opts.password, dst_posts[title]['post_id'])
