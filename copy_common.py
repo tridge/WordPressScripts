@@ -13,6 +13,7 @@ parser.add_option("--url-src", help="Source Wordpress URL", default=None)
 parser.add_option("--url-dst", help="Destination Wordpress URL", default=None)
 parser.add_option("--title-prefix", help="title prefix to look for", default="common-")
 parser.add_option("--blog-id", help="ID of wiki", default='')
+parser.add_option("--force", action='store_true', help="force update", default=False)
 
 (opts, args) = parser.parse_args()
 
@@ -58,7 +59,7 @@ new_keys = ['post_mime_type', 'post_date_gmt', 'sticky', 'post_date',
 
 
 for title in posts.keys():
-    if title in dst_posts and posts[title]['post_modified'] <= dst_posts[title]['post_modified']:
+    if title in dst_posts and posts[title]['post_modified'] <= dst_posts[title]['post_modified'] and not opts.force:
         #print("Destination is newer for %s" % title)
         continue
 
@@ -68,6 +69,10 @@ for title in posts.keys():
     new_post = {}
     for k in new_keys:
         new_post[k] = post[k]
+    if 'link' in post:
+        link = post['link']
+        newlink = link.replace(opts.url_src, opts.url_dst)
+        new_post['link'] = newlink
 
     # force author to be autotest
     new_post['post_author'] = 'autotest'
@@ -82,7 +87,7 @@ for title in posts.keys():
     if title in dst_posts:
         dst_post = dst_server.wp.getPost(opts.blog_id, opts.username, opts.password, dst_posts[title]['post_id'])
 
-        if post['post_modified'] <= dst_post['post_modified']:
+        if post['post_modified'] <= dst_post['post_modified'] and not opts.force:
             print("Destination is newer")
             continue
 
